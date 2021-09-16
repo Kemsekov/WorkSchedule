@@ -84,4 +84,9 @@ Possible output
 
 */
 ```
-
+Here we do some clever(not really) stuff.
+We create some kind of local namespace in function `Process`. There we implement function as series of lambdas that have access
+to this local namespace. This approach is very convenient, but have some disadvantages.
+Because of how `GC` works in such approach we can easily run out of memory because lambdas take a reference to all local namespace. 
+So it is a good practice to call `Clear` method when you done with `WorkSchedule`. This will force `GC` to remove lambdas and
+everything must be fine.
