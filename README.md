@@ -1,5 +1,5 @@
 # WorkSchedule
-A little C# tool that allow to schedule and controll execution of code where function is work quanta
+A little C# tool that allow to schedule and control execution of code where function is work quanta
 # Problem
 Imagine if you need to create some recursive algorithm that must work multithreaded
 ```cs
