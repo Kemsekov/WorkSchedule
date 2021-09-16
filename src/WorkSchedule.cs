@@ -36,18 +36,15 @@ namespace WorkSchedules
         /// <summary>
         /// Runs each todo in new Task
         /// </summary>
-        public void StepEachInNewTask(){
+        public void StepParallel(){
             if(step_count>=Depth) return;
-            List<Task> tasks = new(Depth);
-            foreach (var todo in todoList)
-            {
-                tasks.Add(Task.Run(todo[step_count]));
-            }
-            Task.WaitAll(tasks.ToArray());
+            Parallel.For(0,todoList.Count,(index,_)=>{
+                todoList[index][step_count]?.Invoke();
+            });
             step_count++;
         }
-        public async Task StepEachInNewTaskAsync(){
-            await Task.Run(StepEachInNewTask);
+        public async Task StepParallelAsync(){
+            await Task.Run(StepParallel);
         }
 
         /// <summary>
