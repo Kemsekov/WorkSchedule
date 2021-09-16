@@ -14,7 +14,7 @@ void ProcessSomething(ToProcess value){
     ProcessSomething(value);
 }
 ```
-You may try to solve this by using 'AutoResetEvent` or `Barrier` or whatever, but in the end you
+You may try to solve this by using `AutoResetEvent` or `Barrier` or whatever, but in the end you
 need to manage a whole thing by yourself and sometimes this becames a really hard task.
 
 But you can use `WorkSchedule`!
