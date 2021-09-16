@@ -46,6 +46,10 @@ namespace WorkSchedules
             Task.WaitAll(tasks.ToArray());
             step_count++;
         }
+        public async Task StepEachInNewTaskAsync(){
+            await Task.Run(StepEachInNewTask);
+        }
+
         /// <summary>
         /// Reset all steps to 0
         /// </summary>

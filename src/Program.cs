@@ -1,87 +1,63 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using System;
+﻿using WorkSchedules;
+using System.Linq;
 
-namespace WorkSchedules
-{
-    public class Program
-    {
+WorkSchedule workSchedule = new(3);
 
-        static void Zero(int n)
+void Process(int id,string value){
+    workSchedule.Add(
+        ()=>
         {
-            System.Console.WriteLine($"N : {n} zero");
-        }
-        static void One(int n){
-            System.Console.WriteLine($"N : {n} one");
-        }
-        static void Two(int n){
-            System.Console.WriteLine($"N : {n} two");
-        }
-
-        public static async Task TT()
+            var shifted_array = value.Select(c=>(char)(c+1)).ToArray();
+            value = new string(shifted_array);
+            System.Console.WriteLine($"Zero : {id} {value}");
+        },
+        ()=>
         {
-            WorkSchedule s = new(3);
-            s.Add(new Action[]{
-                ()=>Zero(1), //step 1
-                ()=>One(1),  //step 2
-                ()=>Two(1)});//step 3
-            
-            s.Add(new Action[]{
-                ()=>Zero(2), //step 1
-                ()=>One(2),  //step 2
-                ()=>Two(2)});//step 3
-
-            s.Add(new Action[]{
-                ()=>Zero(3), //step 1
-                ()=>One(3),  //step 2
-                ()=>Two(3)});//step 3
-
-            for (int i = 0; i < 10; i++)
-            {
-                s.StepEachInNewTask(); //zero 1 ; zero 2; zero 3
-                System.Console.WriteLine();
-
-                s.StepEachInNewTask(); //one 1; one 2; one 3;
-                System.Console.WriteLine();
-
-                s.StepEachInNewTask(); //two 1; two 2; two 3
-                System.Console.WriteLine();
-
-                s.Reset();
-            }
-
-            //N : 1 zero
-            //N : 2 zero
-            //N : 3 zero
-
-            //N : 1 one
-            //N : 2 one
-            //N : 3 one
-
-            //N : 1 two
-            //N : 2 two
-            //N : 3 two
-
-        }
-
-    }
-    public class Node : NodeBase
-    {
-        public Node(int i) : base(i)
+            var shifted_array = value.Select(c=>(char)(c+2)).ToArray();
+            value = new string(shifted_array);
+            System.Console.WriteLine($"One : {id} {value}");
+        },
+        ()=>
         {
+            var shifted_array = value.Select(c=>(char)(c-3)).ToArray();
+            value = new string(shifted_array);
+            System.Console.WriteLine($"Two : {id} {value}");
         }
-        public void Do()
-        {
-            System.Console.WriteLine($"Hello {num}");
-        }
-    }
-    public class NodeBase
-    {
-        public int num;
-        public NodeBase(int i)
-        {
-            num = i;
-        }
-    }
-
+    );
 }
+
+Process(0,"Zero");
+Process(1,"One");
+Process(2,"Two");
+Process(3,"Three");
+
+workSchedule.Step();
+System.Console.WriteLine();
+
+workSchedule.StepEachInNewTask();
+System.Console.WriteLine();
+
+workSchedule.StepEachInNewTask();
+System.Console.WriteLine();
+
+workSchedule.Clear();
+
+/*
+Possible output
+
+    Zero : 0 [fsp
+    Zero : 1 Pof
+    Zero : 2 Uxp
+    Zero : 3 Uisff
+
+    One : 1 Rqh
+    One : 3 Wkuhh
+    One : 2 Wzr
+    One : 0 ]hur
+
+    Two : 0 Zero
+    Two : 3 Three
+    Two : 1 One
+    Two : 2 Two
+
+*/
