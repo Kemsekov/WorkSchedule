@@ -56,10 +56,10 @@ Process(3,"Three");
 workSchedule.Step();
 System.Console.WriteLine();
 
-workSchedule.StepEachInNewTask();
+workSchedule.StepParallel();
 System.Console.WriteLine();
 
-workSchedule.StepEachInNewTask();
+workSchedule.StepParallel();
 System.Console.WriteLine();
 
 workSchedule.Clear();
