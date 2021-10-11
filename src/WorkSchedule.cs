@@ -7,7 +7,7 @@ namespace WorkSchedules
 {
     public class WorkSchedule
     {
-        List<Action[]> todoList = new();
+        List<Action[]> todoList = new List<Action[]>();
         SemaphoreSlim block = new SemaphoreSlim(1);
         int Depth { get; }
         int step_count = 0;
