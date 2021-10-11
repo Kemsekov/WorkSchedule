@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using WorkSchedules;
 using Xunit;
 
@@ -28,9 +30,15 @@ namespace Tests
                 ()=>{}
             });
             });
+            Assert.Throws<ArgumentException>(() =>
+            {
+                s.Add(new Action[]{
+                ()=>{}
+            });
+            });
         }
         [Fact]
-        public void Step_CheckIfOutOfBounds()
+        public void Step_CheckIfStepsOutOfBounds()
         {
             WorkSchedule s = new(2);
             string status = null;
@@ -45,38 +53,62 @@ namespace Tests
         [Fact]
         public void Step_DifferentOverrides()
         {
-            WorkSchedule s = new(3);
-            string step1 = null;
-            string step2 = null;
-            Action check = () =>
-            {
-                Assert.Equal(step1, "step1 and med");
-                Assert.Equal(step2, "step2 and med");
-                step1 = null;
-                step2 = null;
-            };
-            s.Add(
-                () => step1 = "step1",
-                () => step1 += " and",
-                () => step1 += " med");
-            s.Add(
-                () => step2 = "step2",
-                () => step2 += " and",
-                () => step2 += " med");
+            WorkSchedule s = new(4);
 
-            for (int i = 0; i < 3; i++)
+            var rand = new Random();
+            string value = "1234567890";
+
+            List<string> results = new();
+            for (int i = 0; i < 40; i++)
             {
-                s.Step();
+                string copy = new string(value);
+                s.Add(
+                    () => { copy = copy.Replace((char)(i % 10 + 60), (char)i); },
+                    () => { copy = copy.Replace((char)(i % 10 + 61), (char)i); },
+                    () => { copy = copy.Replace((char)(i % 10 + 62), (char)i); },
+                    () =>
+                    {
+                        lock (results)
+                            results.Add(copy);
+                    }
+                );
             }
-            check();
+            List<IEnumerable<string>> total_results = new ();
+            for (int i = 0; i < 10; i++)
+            {
+                results.Clear();
 
-            s.Reset();
+                for(int b = 0;b<4;b++)
+                switch (rand.Next() % 4)
+                {
+                    case 0:
+                        s.Step();
+                        break;
+                    case 1:
+                        s.StepParallel();
+                        break;
+                    case 2:
+                        s.StepAsync().Wait();
+                        break;
+                    case 3:
+                        s.StepParallelAsync().Wait();
+                        break;
+                }
+                results.Sort((v1,v2)=>{
+                    int comp = 0;
+                    foreach(var t in v1.Zip(v2)){
+                        comp+=t.First-t.Second;
+                    }
+                    return comp;
+                });
+                total_results.Add(results);
+            }
 
-            s.StepAsync().Wait();
-            s.StepEachInNewTask();
-            s.Step();
+            total_results.Aggregate((v1,v2)=>{
+                Assert.Equal(v1,v2);
+                return v2;
+            });
 
-            check();
         }
         
     }
