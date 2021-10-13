@@ -1,4 +1,6 @@
 # WorkSchedule
+[![nuget](https://img.shields.io/nuget/v/Kemsekov.WorkSchedule.svg)](https://www.nuget.org/packages/Kemsekov.WorkSchedule/) 
+
 A little C# tool that allow to schedule and control execution of code where function is work quanta
 # Problem
 Imagine if you need to create some recursive algorithm that must work multithreaded
