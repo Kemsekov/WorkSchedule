@@ -1,13 +1,21 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kemsekov
 {
+    /// <summary>
+    /// A tool that allows you to divide the logic of a function into 
+    /// parts and subsequently control their execution independently of each other.
+    /// </summary>
     public class WorkSchedule
     {
         List<Action[]> todoList = new List<Action[]>();
+
+        /// <summary>
+        /// Maximum allowed number of steps to run.
+        /// </summary>
+        /// <value></value>
         int Depth { get; }
         int step_count = 0;
         int StepCount => step_count;
@@ -31,22 +39,16 @@ namespace Kemsekov
 
         }
         /// <summary>
-        /// Runs Step() in new Task and return it.
+        /// Runs <see cref="Step()"/> in new Task and return it.
         /// </summary>
         public Task StepAsync()
         {
             return Task.Run(Step);
         }
         /// <summary>
-        /// Runs todo work in parallel.
+        /// Runs todo List in parallel
         /// </summary>
         public void StepParallel()
-        {
-            if (step_count >= Depth)
-                return;
-            _StepParallel();
-        }
-        public async Task StepParallelAsync()
         {
             if (step_count >= Depth)
                 return;
@@ -61,16 +63,15 @@ namespace Kemsekov
             });
         }
 
-
         /// <summary>
-        /// Reset all steps to 0
+        /// Reset steps to 0
         /// </summary>
         public void Reset()
         {
             step_count = 0;
         }
         /// <summary>
-        /// Clears all todo's so there is no work to do
+        /// Clears todo List
         /// </summary>
         public void Clear()
         {
