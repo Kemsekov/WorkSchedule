@@ -90,3 +90,59 @@ to this local namespace. This approach is very convenient, but have some disadva
 Because of how `GC` works in such approach we can easily run out of memory because lambdas take a reference to all local namespace. 
 So it is a good practice to call `Clear` method when you done with `WorkSchedule`. This will force `GC` to remove lambdas and
 everything must be fine.
+
+# Be aware of `StepParallel()` 
+
+Be aware of `WorkSchedule.StepParallel()` execution. If inside of your `Action` you try to add some value to non concurrency-safe collection it can leads  to undefined behaviour.
+
+```cs
+//create WorkSchedule with two steps
+var w = new WorkSchedule(2);
+var items = new List<int>();
+for(int i = 0;i<200;i++)
+    w.Add(
+        //without lock
+        ()=>{
+            items.Add(1);
+        },
+        //with lock
+        ()=>{
+            lock(items);
+            items.Add(1);
+        }
+    );
+
+```
+
+If we execute part without lock by calling `WorkSchedule.StepParallel()` we can expect that `items.Count` is not equal to 200.
+
+```cs
+//execute 200 functions without lock
+w.StepParallel(0);
+Console.Writeline(items.Count);
+```
+Output
+```
+137
+```
+
+This is because of `List<int>` concurrency `Add` leads to undefined behaviour, so use lock.
+
+```cs
+//execute 200 functions with lock
+w.StepParallel(1);
+Console.Writeline(items.Count);
+```
+
+Output
+```
+200
+```
+
+
+
+
+
+
+
+
