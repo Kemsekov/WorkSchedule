@@ -79,7 +79,7 @@ namespace Tests
                 results.Clear();
 
                 for(int b = 0;b<4;b++)
-                switch (rand.Next() % 4)
+                switch (rand.Next() % 3)
                 {
                     case 0:
                         s.Step();
@@ -89,9 +89,6 @@ namespace Tests
                         break;
                     case 2:
                         s.StepAsync().Wait();
-                        break;
-                    case 3:
-                        s.StepParallelAsync().Wait();
                         break;
                 }
                 results.Sort((v1,v2)=>{
