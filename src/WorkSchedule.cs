@@ -24,42 +24,51 @@ namespace Kemsekov
         {
             Depth = depth;
         }
+
         /// <summary>
         /// Step through the list of works and in each of them calls work with StepCount index. Then increment StepCount.
         /// </summary>
-        public void Step()
+        public void Step(){
+            Step(step_count++);
+        }
+        public void Step(int index)
         {
-            if (step_count >= Depth)
+            if (index >= Depth)
                 return;
             foreach (var todo in todoList)
             {
-                todo[step_count]?.Invoke();
+                todo[index]?.Invoke();
             }
-            step_count++;
-
         }
         /// <summary>
         /// Runs <see cref="Step()"/> in new Task and return it.
         /// </summary>
-        public Task StepAsync()
+        public Task StepAsync(){
+            return StepAsync(step_count++);
+        }
+        public Task StepAsync(int index)
         {
-            return Task.Run(Step);
+            return Task.Run(()=>Step(index));
         }
         /// <summary>
         /// Runs todo List in parallel
         /// </summary>
-        public void StepParallel()
+        public void StepParallel(){
+            StepParallel(step_count++);
+        }
+        
+        public void StepParallel(int index)
         {
-            if (step_count >= Depth)
+            if (index >= Depth)
                 return;
-            _StepParallel();
+            _StepParallel(index);
         }
 
-        private void _StepParallel()
+        private void _StepParallel(int index)
         {
-            Parallel.For(0, todoList.Count, (index, _) =>
+            Parallel.ForEach(todoList, (value, _) =>
             {
-                todoList[index][step_count]?.Invoke();
+                value[index]?.Invoke();
             });
         }
 

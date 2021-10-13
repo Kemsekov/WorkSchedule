@@ -49,6 +49,11 @@ namespace Tests
             for (int i = 0; i < 20; i++)
                 s.Step();
             Assert.Equal(status, "first second");
+            status = null;
+            s.Reset();
+            for (int i = 0; i < 20; i++)
+                s.Step(i);
+            Assert.Equal(status, "first second");
         }
         [Fact]
         public void Step_DifferentOverrides()
@@ -56,57 +61,51 @@ namespace Tests
             WorkSchedule s = new(4);
 
             var rand = new Random();
-            string value = "1234567890";
+            List<int> items = new();
 
-            List<string> results = new();
-            for (int i = 0; i < 40; i++)
+            for (int i = 0; i < 200; i++)
             {
-                string copy = new string(value);
+                int copy = i;
                 s.Add(
-                    () => { copy = copy.Replace((char)(i % 10 + 60), (char)i); },
-                    () => { copy = copy.Replace((char)(i % 10 + 61), (char)i); },
-                    () => { copy = copy.Replace((char)(i % 10 + 62), (char)i); },
-                    () =>
-                    {
-                        lock (results)
-                            results.Add(copy);
+                    () => { items.Add(copy); },
+                    () => { items.Add(copy + 1); },
+                    //because it runs in parallel we need to lock
+                    () => { 
+                        lock(items)
+                        items.Add(copy + 2);
+                    },
+                    //and here
+                    () => { 
+                        lock(items)
+                        items.Add(copy + 3);
                     }
                 );
             }
-            List<IEnumerable<string>> total_results = new ();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 200; i++)
             {
-                results.Clear();
+                s.Step();
+                Assert.Equal(items.Count, 200);
+                Assert.Equal(items.GetRange(0, 200), Enumerable.Range(0, 200));
+                items.Clear();
 
-                for(int b = 0;b<4;b++)
-                switch (rand.Next() % 3)
-                {
-                    case 0:
-                        s.Step();
-                        break;
-                    case 1:
-                        s.StepParallel();
-                        break;
-                    case 2:
-                        s.StepAsync().Wait();
-                        break;
-                }
-                results.Sort((v1,v2)=>{
-                    int comp = 0;
-                    foreach(var t in v1.Zip(v2)){
-                        comp+=t.First-t.Second;
-                    }
-                    return comp;
-                });
-                total_results.Add(results);
+                s.StepAsync().Wait();
+                Assert.Equal(items.Count, 200);
+                Assert.Equal(items.GetRange(0, 200), Enumerable.Range(1, 200));
+                items.Clear();
+
+                s.StepParallel();
+                Assert.Equal(items.Count, 200);
+                items.Sort();
+                Assert.Equal(items.GetRange(0, 200), Enumerable.Range(2, 200));
+                items.Clear();
+
+                s.StepParallel();
+                Assert.Equal(items.Count, 200);
+                items.Sort();
+                Assert.Equal(items.GetRange(0, 200), Enumerable.Range(3, 200));
+                items.Clear();
+                s.Reset();
             }
-
-            total_results.Aggregate((v1,v2)=>{
-                Assert.Equal(v1,v2);
-                return v2;
-            });
-
         }
-        
     }
 }
